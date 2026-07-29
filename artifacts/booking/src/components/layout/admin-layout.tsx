@@ -1,9 +1,14 @@
 import { Link, useLocation } from "wouter";
-import { Gauge, CalendarDays, ClipboardList, ArrowLeft } from "lucide-react";
+import { Gauge, CalendarDays, ClipboardList, ArrowLeft, LogOut } from "lucide-react";
+import { useClerk, useUser } from "@clerk/react";
 import logoImg from "@assets/IMG_0355_1785277430005.jpeg";
+
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export function AdminLayout({ children, title }: { children: React.ReactNode, title: string }) {
   const [location] = useLocation();
+  const { signOut } = useClerk();
+  const { user } = useUser();
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -50,7 +55,16 @@ export function AdminLayout({ children, title }: { children: React.ReactNode, ti
           </span>
         </nav>
 
-        <div className="p-3 border-t border-sidebar-border">
+        <div className="p-3 border-t border-sidebar-border space-y-0.5">
+          {/* Signed-in user */}
+          {user && (
+            <div className="px-3 py-2 mb-1">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground truncate">
+                {user.primaryEmailAddress?.emailAddress ?? user.username ?? "Staff"}
+              </p>
+            </div>
+          )}
+
           <Link
             href="/"
             className="flex items-center gap-3 px-3 py-2.5 rounded text-sm font-semibold uppercase tracking-wide text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
@@ -58,6 +72,15 @@ export function AdminLayout({ children, title }: { children: React.ReactNode, ti
             <ArrowLeft className="w-4 h-4 shrink-0" />
             Back to Site
           </Link>
+
+          <button
+            type="button"
+            onClick={() => signOut({ redirectUrl: basePath || "/" })}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-sm font-semibold uppercase tracking-wide text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-red-400 transition-colors"
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            Sign Out
+          </button>
         </div>
       </aside>
 

@@ -33,10 +33,17 @@ export function AdminLayout({ children, title }: { children: React.ReactNode, ti
             <Gauge className="w-4 h-4 shrink-0" />
             Dashboard
           </Link>
-          <span className="flex items-center gap-3 px-3 py-2.5 rounded text-sm font-semibold uppercase tracking-wide text-sidebar-foreground/30 cursor-not-allowed">
+          <Link
+            href="/admin/calendar"
+            className={`flex items-center gap-3 px-3 py-2.5 rounded text-sm font-semibold uppercase tracking-wide transition-colors ${
+              location === '/admin/calendar'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+            }`}
+          >
             <CalendarDays className="w-4 h-4 shrink-0" />
             Calendar
-          </span>
+          </Link>
           <span className="flex items-center gap-3 px-3 py-2.5 rounded text-sm font-semibold uppercase tracking-wide text-sidebar-foreground/30 cursor-not-allowed">
             <ClipboardList className="w-4 h-4 shrink-0" />
             Services

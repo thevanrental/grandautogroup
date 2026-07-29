@@ -1,0 +1,2 @@
+- [Express 5 CORS wildcard](express5-cors.md) — Express 5 + path-to-regexp 8 rejects bare `*` and `/(.*)`; use `cors({ origin: true })` middleware only, no manual `app.options`.
+- [Expo mobile brand tokens](expo-brand-tokens.md) — Grand Auto Group mobile uses Barlow + BarlowCondensed fonts; dark-only palette synced from `artifacts/booking/src/index.css`.

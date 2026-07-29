@@ -36,7 +36,8 @@ app.use(
 // Clerk proxy — must come before body parsers (streams raw bytes)
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
-app.use(cors({ credentials: true, origin: true }));
+// origin: true reflects the request origin, enabling cross-origin Expo web preview
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -51,5 +52,4 @@ app.use(
 );
 
 app.use("/api", router);
-
 export default app;

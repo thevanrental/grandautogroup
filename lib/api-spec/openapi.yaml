@@ -3,13 +3,17 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Grand Auto Group booking API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: appointments
+    description: Appointment booking operations
+  - name: services
+    description: Auto repair services
 paths:
   /healthz:
     get:
@@ -24,6 +28,156 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /services:
+    get:
+      operationId: listServices
+      tags: [services]
+      summary: List available services
+      responses:
+        "200":
+          description: List of services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Service"
+
+  /appointments:
+    get:
+      operationId: listAppointments
+      tags: [appointments]
+      summary: List all appointments
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+    post:
+      operationId: createAppointment
+      tags: [appointments]
+      summary: Book an appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentInput"
+      responses:
+        "201":
+          description: Appointment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        "400":
+          description: Invalid input
+
+  /appointments/summary:
+    get:
+      operationId: getAppointmentSummary
+      tags: [appointments]
+      summary: Get appointment statistics for admin dashboard
+      responses:
+        "200":
+          description: Summary statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentSummary"
+
+  /appointments/today:
+    get:
+      operationId: getTodayAppointments
+      tags: [appointments]
+      summary: Get today's appointments
+      responses:
+        "200":
+          description: Today's appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+
+  /appointments/{id}:
+    get:
+      operationId: getAppointment
+      tags: [appointments]
+      summary: Get appointment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateAppointment
+      tags: [appointments]
+      summary: Update appointment status or details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentUpdate"
+      responses:
+        "200":
+          description: Updated appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteAppointment
+      tags: [appointments]
+      summary: Cancel / delete appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +188,139 @@ components:
       required:
         - status
 
+    Service:
+      type: object
+      required: [id, name, description, durationMinutes, price]
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: number
+        price:
+          type: string
+
+    Appointment:
+      type: object
+      required:
+        - id
+        - customerName
+        - customerEmail
+        - customerPhone
+        - vehicleMake
+        - vehicleModel
+        - vehicleYear
+        - serviceId
+        - serviceName
+        - appointmentDate
+        - appointmentTime
+        - status
+        - createdAt
+      properties:
+        id:
+          type: number
+        customerName:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
+          type: string
+        vehicleMake:
+          type: string
+        vehicleModel:
+          type: string
+        vehicleYear:
+          type: number
+        serviceId:
+          type: number
+        serviceName:
+          type: string
+        appointmentDate:
+          type: string
+        appointmentTime:
+          type: string
+        status:
+          type: string
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AppointmentInput:
+      type: object
+      required:
+        - customerName
+        - customerEmail
+        - customerPhone
+        - vehicleMake
+        - vehicleModel
+        - vehicleYear
+        - serviceId
+        - appointmentDate
+        - appointmentTime
+      properties:
+        customerName:
+          type: string
+          minLength: 1
+        customerEmail:
+          type: string
+          minLength: 1
+        customerPhone:
+          type: string
+          minLength: 1
+        vehicleMake:
+          type: string
+          minLength: 1
+        vehicleModel:
+          type: string
+          minLength: 1
+        vehicleYear:
+          type: number
+        serviceId:
+          type: number
+        appointmentDate:
+          type: string
+          minLength: 1
+        appointmentTime:
+          type: string
+          minLength: 1
+        notes:
+          type: string
+
+    AppointmentUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+        appointmentDate:
+          type: string
+        appointmentTime:
+          type: string
+        notes:
+          type: string
+
+    AppointmentSummary:
+      type: object
+      required:
+        - total
+        - pending
+        - confirmed
+        - completed
+        - cancelled
+        - todayCount
+      properties:
+        total:
+          type: number
+        pending:
+          type: number
+        confirmed:
+          type: number
+        completed:
+          type: number
+        cancelled:
+          type: number
+        todayCount:
+          type: number

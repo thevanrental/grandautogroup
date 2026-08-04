@@ -3,6 +3,8 @@
   <head>
     <!-- Google Tag Manager -->
     <script>
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
       new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
       j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
@@ -99,6 +101,19 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PTMP9KST"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
+    <script>
+      document.addEventListener('click', function(event) {
+        var link = event.target.closest && event.target.closest('a[href]');
+        if (!link) return;
+        var href = link.href || '';
+        var eventName = '';
+        if (href.indexOf('booking.tekmetric.com') !== -1) eventName = 'booking_click';
+        else if (href.indexOf('tel:') === 0) eventName = 'phone_click';
+        else if (href.indexOf('mailto:') === 0) eventName = 'email_click';
+        else if (href.indexOf('maps.app.goo.gl') !== -1) eventName = 'directions_click';
+        if (eventName) window.gtag('event', eventName, { link_url: href, link_text: (link.textContent || '').trim() });
+      });
+    </script>
     <div id="root"></div>
   </body>
 </html>

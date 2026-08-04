@@ -208,21 +208,23 @@ export default function Home() {
               </div>
               <div className="relative">
                 <Reveal direction="right">
-                  <div className="aspect-[4/5] bg-white/5 border border-white/10 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    {/* Abstract technical visual placeholder since we lack real photos */}
-                    <div className="absolute inset-0 flex flex-col justify-center items-center text-white/5 gap-8 p-12">
-                      <Zap className="w-48 h-48" strokeWidth={0.5} />
-                      <div className="w-full h-px bg-white/10 relative">
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1/3 h-[2px] bg-primary shadow-[0_0_10px_rgba(255,51,54,0.8)]" />
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { icon: ShieldCheck, label: "I-CAR Gold\nCertified", accent: true },
+                      { icon: Wrench,      label: "ASE Master\nTechnicians", accent: false },
+                      { icon: CarFront,    label: "All Makes\n& Models",     accent: false },
+                      { icon: Activity,    label: "Free\nEstimates",         accent: true },
+                    ].map(({ icon: Icon, label, accent }, i) => (
+                      <div
+                        key={i}
+                        className={`flex flex-col items-center justify-center gap-4 p-8 border ${accent ? "bg-primary/10 border-primary/40" : "bg-white/5 border-white/10"}`}
+                      >
+                        <Icon className={`w-10 h-10 ${accent ? "text-primary" : "text-white/60"}`} />
+                        <span className={`font-serif font-bold uppercase tracking-widest text-center text-sm leading-snug whitespace-pre-line ${accent ? "text-primary" : "text-white"}`}>
+                          {label}
+                        </span>
                       </div>
-                    </div>
-                  </div>
-                  {/* Decorative accent element */}
-                  <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-primary/20 backdrop-blur-xl border border-primary/50 flex items-center justify-center p-4">
-                    <div className="font-serif text-center font-bold uppercase tracking-widest text-sm text-primary">
-                      Certified<br/>Facility
-                    </div>
+                    ))}
                   </div>
                 </Reveal>
               </div>
@@ -265,9 +267,6 @@ export default function Home() {
                     <p className="text-muted-foreground leading-relaxed flex-1">
                       {svc.desc}
                     </p>
-                    <div className="mt-8 flex items-center text-sm font-bold uppercase tracking-widest text-white/30 group-hover:text-white transition-colors">
-                      <span className="mr-2">Explore</span> <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
                   </div>
                 </Reveal>
               ))}

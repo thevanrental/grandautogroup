@@ -1,4 +1,4 @@
-import { ExternalLink, CheckCircle2, Clock, Shield, Star } from "lucide-react";
+import { ExternalLink, CheckCircle2, Clock, Shield, Star, Phone, Mail, MapPin } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/layout/site-layout";
 
 const BOOKING_URL =
@@ -41,6 +41,28 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Contact strip */}
+      <div className="bg-card border-b border-border">
+        <div className="container mx-auto px-6 py-4 flex flex-wrap gap-6 items-center justify-center sm:justify-start text-sm">
+          <a href="tel:+16572670000" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-medium">
+            <Phone className="w-4 h-4 text-primary shrink-0" />
+            +1 657 267 0000
+          </a>
+          <a href="mailto:office@grandautogroupoc.com" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-medium">
+            <Mail className="w-4 h-4 text-primary shrink-0" />
+            office@grandautogroupoc.com
+          </a>
+          <a href="https://maps.app.goo.gl/WFwWWNBM3HwBjPwq7" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-medium">
+            <MapPin className="w-4 h-4 text-primary shrink-0" />
+            1409 E Warner Ave Suite A, Santa Ana, CA 92705
+          </a>
+          <span className="flex items-center gap-2 text-muted-foreground font-medium">
+            <Clock className="w-4 h-4 text-primary shrink-0" />
+            Mon–Fri 8AM–5PM · Sat 8AM–2PM
+          </span>
+        </div>
+      </div>
 
       {/* CTA Card */}
       <main className="flex-1 container mx-auto px-6 py-16 -mt-16 relative z-20">

@@ -15,10 +15,10 @@ import Confirmation from "@/pages/confirmation";
 const queryClient = new QueryClient();
 
 // REQUIRED — resolves key from hostname so dev + prod use the right key automatically
-const clerkPubKey = publishableKeyFromHost(
-  window.location.hostname,
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
-);
+const configuredClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const clerkPubKey = configuredClerkKey
+  ? publishableKeyFromHost(window.location.hostname, configuredClerkKey)
+  : null;
 
 // REQUIRED — empty in dev (intentional), auto-set in prod
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
@@ -29,10 +29,6 @@ function stripBase(path: string): string {
   return basePath && path.startsWith(basePath)
     ? path.slice(basePath.length) || "/"
     : path;
-}
-
-if (!clerkPubKey) {
-  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY");
 }
 
 const clerkAppearance = {
@@ -149,7 +145,7 @@ function ClerkProviderWithRoutes() {
 
   return (
     <ClerkProvider
-      publishableKey={clerkPubKey}
+      publishableKey={clerkPubKey!}
       proxyUrl={clerkProxyUrl}
       appearance={clerkAppearance}
       signInUrl={`${basePath}/sign-in`}
@@ -189,6 +185,20 @@ function ClerkProviderWithRoutes() {
 }
 
 function App() {
+  // The marketing site is intentionally available without Clerk. This keeps
+  // the public site online on static hosts while admin remains disabled until
+  // a deployment provides the Clerk environment variables and API backend.
+  if (!clerkPubKey) {
+    return (
+      <WouterRouter base={basePath}>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route component={NotFound} />
+        </Switch>
+      </WouterRouter>
+    );
+  }
+
   return (
     <WouterRouter base={basePath}>
       <ClerkProviderWithRoutes />

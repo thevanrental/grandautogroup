@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 72" fill="none">
+  <!-- Red parallelogram chevrons -->
+  <polygon points="8,8 28,8 20,64 0,64" fill="#D91A27"/>
+  <polygon points="24,8 44,8 36,64 16,64" fill="#D91A27" opacity="0.75"/>
+  <!-- White text -->
+  <text x="56" y="32" font-family="Barlow Condensed, Barlow, sans-serif" font-weight="800" font-size="22" fill="white" letter-spacing="3">GRAND AUTO</text>
+  <text x="56" y="60" font-family="Barlow Condensed, Barlow, sans-serif" font-weight="800" font-size="22" fill="white" letter-spacing="3">GROUP</text>
+</svg>

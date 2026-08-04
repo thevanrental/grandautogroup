@@ -9,6 +9,7 @@ import {
   UpdateAppointmentBody,
   DeleteAppointmentParams,
 } from "@workspace/api-zod";
+import { sendBookingConfirmation } from "../lib/email.js";
 
 const router: IRouter = Router();
 
@@ -112,6 +113,21 @@ router.post("/appointments", async (req, res): Promise<void> => {
       status: "pending",
     })
     .returning();
+
+  // Send confirmation email (non-blocking — failure does not affect the response)
+  sendBookingConfirmation({
+    appointmentId: appointment.id,
+    customerName: appointment.customerName,
+    customerEmail: appointment.customerEmail,
+    serviceName: appointment.serviceName,
+    appointmentDate: appointment.appointmentDate,
+    appointmentTime: appointment.appointmentTime,
+    vehicleMake: appointment.vehicleMake,
+    vehicleModel: appointment.vehicleModel,
+    vehicleYear: appointment.vehicleYear,
+  }).catch((err) => {
+    console.error("[email] Unexpected error sending confirmation:", err);
+  });
 
   res.status(201).json(appointment);
 });

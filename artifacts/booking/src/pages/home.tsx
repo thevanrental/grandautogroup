@@ -1,142 +1,334 @@
-import { ExternalLink, CheckCircle2, Clock, Shield, Star, Phone, Mail, MapPin } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/layout/site-layout";
+import { 
+  ArrowRight, ShieldCheck, Wrench, Settings, 
+  CarFront, Zap, Activity, CheckCircle2, ChevronRight 
+} from "lucide-react";
 
 const BOOKING_URL =
   "https://booking.tekmetric.com/?shop=c52d22a9-3e21-461c-a199-bd3600adfb1c&rwg_token=AE37R_gQsE8sdOZ3SGsdBb1p5md9i_Nw69PZBlZFVqUzdljTW67xcPRSsNkC0XBFD8kCYzOmQfRbnEXXt3KUP6TMcEdDIC_qsQ%3D%3D";
 
+// Reusable scroll reveal component
+const Reveal = ({ 
+  children, 
+  delay = 0, 
+  className = "",
+  direction = "up"
+}: { 
+  children: React.ReactNode, 
+  delay?: number, 
+  className?: string,
+  direction?: "up" | "left" | "right" | "none"
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1, rootMargin: "-50px" });
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const baseClasses = "transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]";
+  
+  let translateClass = "";
+  if (!isVisible) {
+    if (direction === "up") translateClass = "opacity-0 translate-y-16";
+    else if (direction === "left") translateClass = "opacity-0 -translate-x-16";
+    else if (direction === "right") translateClass = "opacity-0 translate-x-16";
+    else if (direction === "none") translateClass = "opacity-0 scale-95";
+  } else {
+    translateClass = "opacity-100 translate-y-0 translate-x-0 scale-100";
+  }
+
+  return (
+    <div
+      ref={ref}
+      className={`${baseClasses} ${translateClass} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
+
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-[#0d0d0d] text-foreground flex flex-col font-sans selection:bg-primary selection:text-white">
       <SiteHeader />
 
-      {/* Hero */}
-      <section className="relative bg-sidebar text-sidebar-foreground pt-28 pb-40 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary opacity-10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-full h-px bg-border" />
-        </div>
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-2xl">
-            <p className="text-primary font-bold uppercase tracking-[0.2em] text-sm mb-4">
-              Grand Auto Group
-            </p>
-            <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tight leading-none mb-6">
-              Expert Auto Service.<br />
-              <span className="text-primary">Without the Hassle.</span>
-            </h1>
-            <p className="text-lg text-sidebar-foreground/70 mb-10 max-w-lg leading-relaxed">
-              Book your service online in minutes. Certified technicians,
-              transparent pricing, and a commitment to getting you back on the
-              road safely.
-            </p>
-            <a
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 bg-primary text-primary-foreground px-10 py-4 rounded-sm font-bold text-lg uppercase tracking-widest hover:bg-primary/90 transition-colors shadow-lg"
-            >
-              Book Appointment
-              <ExternalLink className="w-5 h-5" />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact strip */}
-      <div className="bg-card border-b border-border">
-        <div className="container mx-auto px-6 py-4 flex flex-wrap gap-6 items-center justify-center sm:justify-start text-sm">
-          <a href="tel:+16572670000" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-medium">
-            <Phone className="w-4 h-4 text-primary shrink-0" />
-            +1 657 267 0000
-          </a>
-          <a href="mailto:office@grandautogroupoc.com" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-medium">
-            <Mail className="w-4 h-4 text-primary shrink-0" />
-            office@grandautogroupoc.com
-          </a>
-          <a href="https://maps.app.goo.gl/WFwWWNBM3HwBjPwq7" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-medium">
-            <MapPin className="w-4 h-4 text-primary shrink-0" />
-            1409 E Warner Ave Suite A, Santa Ana, CA 92705
-          </a>
-          <span className="flex items-center gap-2 text-muted-foreground font-medium">
-            <Clock className="w-4 h-4 text-primary shrink-0" />
-            Mon–Fri 8AM–5PM · Sat 8AM–2PM
-          </span>
-        </div>
-      </div>
-
-      {/* CTA Card */}
-      <main className="flex-1 container mx-auto px-6 py-16 -mt-16 relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Main booking card */}
-          <div className="lg:col-span-2 bg-card border border-card-border rounded-sm p-10 flex flex-col justify-between shadow-xl">
-            <div>
-              <h2 className="text-2xl font-bold uppercase tracking-widest mb-3">
-                Schedule Your Visit
-              </h2>
-              <p className="text-muted-foreground leading-relaxed mb-8 max-w-md">
-                Click the button below to open our online booking system.
-                Choose your service, pick a time that works for you, and
-                you're all set — takes less than 2 minutes.
-              </p>
-            </div>
-            <a
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-8 py-4 rounded-sm font-bold text-base uppercase tracking-widest hover:bg-primary/90 transition-colors w-full sm:w-auto"
-            >
-              Open Booking System
-              <ExternalLink className="w-4 h-4" />
-            </a>
+      <main className="flex-1">
+        {/* 1. Hero Section */}
+        <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden min-h-[90vh] flex flex-col justify-center">
+          {/* Background effects */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary opacity-5 rounded-full blur-[120px] mix-blend-screen" />
+            <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/black-linen.png')] opacity-20 mix-blend-overlay" />
           </div>
 
-          {/* Why us */}
-          <div className="bg-sidebar border border-sidebar-border rounded-sm p-8 space-y-6">
-            <h3 className="text-lg font-bold uppercase tracking-widest text-sidebar-foreground">
-              Why Choose Us?
-            </h3>
-            <div className="space-y-5">
-              <div className="flex gap-4">
-                <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-sidebar-foreground text-sm uppercase tracking-wide">ASE Certified</p>
-                  <p className="text-sm text-sidebar-foreground/60 mt-0.5">
-                    Our technicians hold the highest industry credentials.
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+              <div className="lg:col-span-8">
+                <Reveal direction="left">
+                  <p className="text-primary font-serif font-bold uppercase tracking-[0.3em] text-sm md:text-base mb-6 flex items-center gap-4">
+                    <span className="w-12 h-[2px] bg-primary"></span>
+                    Expert Auto Body Shop in Orange County
                   </p>
-                </div>
+                </Reveal>
+                <Reveal direction="left" delay={100}>
+                  <h1 className="font-serif text-6xl sm:text-7xl lg:text-[7rem] font-black uppercase tracking-tight leading-[0.85] mb-8">
+                    Santa Ana's<br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60">Auto Body Shop</span><br />
+                    & Full-Service Repair
+                  </h1>
+                </Reveal>
+                <Reveal direction="left" delay={200}>
+                  <div className="inline-block bg-primary text-white font-serif font-black text-3xl sm:text-4xl lg:text-6xl uppercase tracking-wider px-4 py-2 mb-10 transform -skew-x-6">
+                    <span className="block transform skew-x-6">From Collision To Completion</span>
+                  </div>
+                </Reveal>
+                
+                <Reveal direction="up" delay={300}>
+                  <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed mb-10 border-l-2 border-primary/50 pl-6">
+                    Complete auto care under one roof: collision repair, European vehicle service, custom bodywork & commercial fleet maintenance. All insurance claims handled.
+                  </p>
+                </Reveal>
+
+                <Reveal direction="up" delay={400}>
+                  <a
+                    href={BOOKING_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative inline-flex items-center justify-center gap-4 bg-primary text-white px-10 py-5 font-serif font-bold text-xl tracking-[0.2em] uppercase overflow-hidden"
+                  >
+                    <div className="absolute inset-0 w-full h-full bg-black/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                    <span className="relative z-10 flex items-center gap-3">
+                      Schedule Service 
+                      <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+                    </span>
+                  </a>
+                </Reveal>
               </div>
-              <div className="flex gap-4">
-                <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-sidebar-foreground text-sm uppercase tracking-wide">24-Month Warranty</p>
-                  <p className="text-sm text-sidebar-foreground/60 mt-0.5">
-                    Parts and labor backed by our comprehensive guarantee.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <Clock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-sidebar-foreground text-sm uppercase tracking-wide">Quick Turnaround</p>
-                  <p className="text-sm text-sidebar-foreground/60 mt-0.5">
-                    Most services completed same day so you're not waiting long.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <Star className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-sidebar-foreground text-sm uppercase tracking-wide">Transparent Pricing</p>
-                  <p className="text-sm text-sidebar-foreground/60 mt-0.5">
-                    No hidden fees. You approve every repair before we start.
-                  </p>
-                </div>
+
+              {/* Quick Info Card */}
+              <div className="lg:col-span-4 lg:ml-auto w-full max-w-md">
+                <Reveal direction="right" delay={500}>
+                  <div className="border border-white/10 bg-white/[0.02] backdrop-blur-sm p-8 flex flex-col gap-6 relative overflow-hidden group hover:border-primary/30 transition-colors duration-500">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-colors duration-500" />
+                    
+                    <div className="space-y-2">
+                      <p className="text-xs font-serif text-primary uppercase tracking-[0.2em]">Call Us Anytime</p>
+                      <p className="text-xl font-semibold tracking-wider">+1 657 267 0000</p>
+                    </div>
+                    <div className="w-full h-px bg-white/5" />
+                    <div className="space-y-2">
+                      <p className="text-xs font-serif text-primary uppercase tracking-[0.2em]">Email</p>
+                      <p className="text-sm text-muted-foreground">office@grandautogroupoc.com</p>
+                    </div>
+                    <div className="w-full h-px bg-white/5" />
+                    <div className="space-y-2">
+                      <p className="text-xs font-serif text-primary uppercase tracking-[0.2em]">Address</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        1409 E Warner Ave Suite A<br/>Santa Ana, CA 92705
+                      </p>
+                    </div>
+                  </div>
+                </Reveal>
               </div>
             </div>
           </div>
+        </section>
 
-        </div>
+        {/* 2. Trust Signals Bar */}
+        <section className="bg-primary text-white border-y border-white/10 py-6 overflow-hidden">
+          <div className="container mx-auto px-6">
+            <div className="flex flex-wrap items-center justify-center lg:justify-between gap-8 text-sm md:text-base font-serif font-bold uppercase tracking-widest">
+              <Reveal delay={0} direction="none" className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" /> All Insurance Accepted
+              </Reveal>
+              <Reveal delay={100} direction="none" className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" /> Same-Day Service Available
+              </Reveal>
+              <Reveal delay={200} direction="none" className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" /> I-CAR & ASE Certified
+              </Reveal>
+              <Reveal delay={300} direction="none" className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" /> Free Estimates
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. The Grand Auto Difference (About) */}
+        <section className="py-32 relative">
+          <div className="container mx-auto px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div>
+                <Reveal direction="left">
+                  <h2 className="font-serif text-4xl md:text-5xl font-bold uppercase tracking-tight mb-8">
+                    Zero Compromise.<br />
+                    <span className="text-primary">Maximum Performance.</span>
+                  </h2>
+                </Reveal>
+                <Reveal direction="left" delay={100}>
+                  <p className="text-lg text-muted-foreground leading-relaxed mb-6">
+                    We don't just fix cars; we restore confidence. Whether you're driving a precision European sports car or managing a commercial fleet, our workshop is engineered to deliver exactly what you need: fast turnarounds, transparent pricing, and unparalleled craftsmanship.
+                  </p>
+                </Reveal>
+                <Reveal direction="left" delay={200}>
+                  <p className="text-lg text-muted-foreground leading-relaxed mb-10">
+                    Equipped with advanced diagnostic tools and staffed by certified master technicians, Grand Auto Group is Santa Ana's definitive choice for drivers who refuse to settle for mediocre service.
+                  </p>
+                </Reveal>
+                <Reveal direction="left" delay={300}>
+                  <div className="flex gap-6">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-serif text-5xl font-black text-white">506+</span>
+                      <span className="text-xs text-primary font-bold uppercase tracking-widest">Cars Repaired</span>
+                    </div>
+                    <div className="w-px bg-white/10" />
+                    <div className="flex flex-col gap-1">
+                      <span className="font-serif text-5xl font-black text-white">379+</span>
+                      <span className="text-xs text-primary font-bold uppercase tracking-widest">Collision Jobs</span>
+                    </div>
+                    <div className="w-px bg-white/10" />
+                    <div className="flex flex-col gap-1">
+                      <span className="font-serif text-5xl font-black text-white">100%</span>
+                      <span className="text-xs text-primary font-bold uppercase tracking-widest">Satisfaction Goal</span>
+                    </div>
+                  </div>
+                </Reveal>
+              </div>
+              <div className="relative">
+                <Reveal direction="right">
+                  <div className="aspect-[4/5] bg-white/5 border border-white/10 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    {/* Abstract technical visual placeholder since we lack real photos */}
+                    <div className="absolute inset-0 flex flex-col justify-center items-center text-white/5 gap-8 p-12">
+                      <Zap className="w-48 h-48" strokeWidth={0.5} />
+                      <div className="w-full h-px bg-white/10 relative">
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1/3 h-[2px] bg-primary shadow-[0_0_10px_rgba(255,51,54,0.8)]" />
+                      </div>
+                    </div>
+                  </div>
+                  {/* Decorative accent element */}
+                  <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-primary/20 backdrop-blur-xl border border-primary/50 flex items-center justify-center p-4">
+                    <div className="font-serif text-center font-bold uppercase tracking-widest text-sm text-primary">
+                      Certified<br/>Facility
+                    </div>
+                  </div>
+                </Reveal>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. Services Grid */}
+        <section className="py-32 bg-black relative border-t border-white/5">
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+          <div className="container mx-auto px-6">
+            <Reveal direction="up">
+              <div className="text-center mb-20">
+                <h2 className="font-serif text-5xl font-black uppercase tracking-tight mb-4">
+                  Precision <span className="text-primary">Capabilities</span>
+                </h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  From routine maintenance to complex collision repairs, our facility handles every aspect of vehicle care.
+                </p>
+              </div>
+            </Reveal>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { title: "Regular Services", icon: Wrench, desc: "Oil changes, brake service, tune-ups, and routine maintenance to keep you running smoothly." },
+                { title: "European Auto Repair", icon: CarFront, desc: "Specialized care for Mercedes, BMW, Audi, and Porsche by certified experts." },
+                { title: "Collision & Body Shop", icon: ShieldCheck, desc: "Full collision repair, impeccable paint matching, and OEM parts. We handle the insurance." },
+                { title: "Fleet Services", icon: Activity, desc: "Priority maintenance for business fleets minimizing downtime and maximizing efficiency." },
+                { title: "Wheel Alignment", icon: Settings, desc: "Precision 4-wheel alignment for all makes and models using state-of-the-art racks." },
+                { title: "Engine Diagnostics", icon: Zap, desc: "Advanced computer diagnostics to pinpoint and resolve complex engine and electrical issues." }
+              ].map((svc, i) => (
+                <Reveal key={i} delay={i * 100} direction="up">
+                  <div className="group bg-[#111] border border-white/5 hover:border-primary/50 p-8 transition-all duration-500 hover:-translate-y-2 h-full flex flex-col cursor-default">
+                    <div className="mb-6 inline-flex p-4 bg-white/5 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-500 transform group-hover:rotate-12 group-hover:scale-110">
+                      <svc.icon className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-serif text-2xl font-bold uppercase tracking-wide mb-4 group-hover:text-primary transition-colors">
+                      {svc.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed flex-1">
+                      {svc.desc}
+                    </p>
+                    <div className="mt-8 flex items-center text-sm font-bold uppercase tracking-widest text-white/30 group-hover:text-white transition-colors">
+                      <span className="mr-2">Explore</span> <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 5. Partner Brands Strip */}
+        <section className="py-16 border-y border-white/5 bg-[#0a0a0a]">
+          <div className="container mx-auto px-6 text-center mb-10">
+            <Reveal direction="up">
+              <h4 className="font-serif text-sm font-bold uppercase tracking-[0.3em] text-muted-foreground">
+                Trusted by the Best in the Industry
+              </h4>
+            </Reveal>
+          </div>
+          <div className="container mx-auto px-6">
+            <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16">
+              {["Liqui Moly", "Bosch", "Schaeffler", "MAHLE", "Brembo", "Valeo"].map((brand, i) => (
+                <Reveal key={i} delay={i * 100} direction="up">
+                  <span className="font-serif text-2xl md:text-4xl font-black uppercase tracking-widest text-white/20 hover:text-white/60 transition-colors cursor-default">
+                    {brand}
+                  </span>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 6. Massive CTA Section */}
+        <section className="py-32 relative overflow-hidden bg-primary text-white">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay" />
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-black/20 transform skew-x-12 translate-x-32" />
+          
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="max-w-4xl">
+              <Reveal direction="up">
+                <h2 className="font-serif text-5xl md:text-7xl font-black uppercase tracking-tight mb-8">
+                  Ready to get back <br/> on the road?
+                </h2>
+              </Reveal>
+              <Reveal direction="up" delay={100}>
+                <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-2xl font-light">
+                  Skip the phone call. Use our streamlined online booking system to choose your service, pick a time, and secure your spot in less than 2 minutes.
+                </p>
+              </Reveal>
+              <Reveal direction="up" delay={200}>
+                <a
+                  href={BOOKING_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-4 bg-black text-white px-12 py-6 font-serif font-bold text-xl md:text-2xl tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-colors duration-300 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
+                >
+                  Book Appointment
+                  <ArrowRight className="w-6 h-6" />
+                </a>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
       </main>
 
       <SiteFooter />

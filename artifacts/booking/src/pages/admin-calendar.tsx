@@ -1,13 +1,13 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useListAppointments, getListAppointmentsQueryKey, useUpdateAppointment, getGetAppointmentSummaryQueryKey, getGetTodayAppointmentsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate, formatTime, getStatusColor } from "@/lib/formatters";
-import { ChevronLeft, ChevronRight, Check, X, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, X, CalendarDays, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Appointment } from "@workspace/api-client-react";
 
@@ -50,6 +50,10 @@ function timeToHour(time: string): number {
   return h + m / 60;
 }
 
+function hourToTime(h: number): string {
+  return `${String(h).padStart(2, "0")}:00`;
+}
+
 const STATUS_STYLES: Record<string, { bg: string; border: string; text: string; dot: string }> = {
   pending:   { bg: "bg-amber-50",   border: "border-amber-300",  text: "text-amber-900",   dot: "bg-amber-400" },
   confirmed: { bg: "bg-emerald-50", border: "border-emerald-300",text: "text-emerald-900",  dot: "bg-emerald-500" },
@@ -61,12 +65,24 @@ function getStyle(status: string) {
   return STATUS_STYLES[status.toLowerCase()] ?? STATUS_STYLES.cancelled;
 }
 
+interface PendingReschedule {
+  apt: Appointment;
+  newDate: string;
+  newHour: number;
+}
+
 export default function AdminCalendar() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
   const [selected, setSelected] = useState<Appointment | null>(null);
+
+  // Drag state
+  const draggedAptRef = useRef<Appointment | null>(null);
+  const [dropHighlight, setDropHighlight] = useState<{ ymd: string; hour: number } | null>(null);
+  const [pendingReschedule, setPendingReschedule] = useState<PendingReschedule | null>(null);
+  const isDraggingRef = useRef(false);
 
   const weekEnd = addDays(weekStart, 6);
 
@@ -76,7 +92,7 @@ export default function AdminCalendar() {
     { query: { queryKey: getListAppointmentsQueryKey({}) } }
   );
 
-  const updateStatus = useUpdateAppointment();
+  const updateMutation = useUpdateAppointment();
 
   // Group appointments by date string for the current week
   const weekDays = useMemo(() => {
@@ -95,19 +111,87 @@ export default function AdminCalendar() {
   const todayYMD = toYMD(new Date());
 
   const handleStatusChange = (id: number, newStatus: string) => {
-    updateStatus.mutate(
+    updateMutation.mutate(
       { id, data: { status: newStatus } },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListAppointmentsQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetAppointmentSummaryQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetTodayAppointmentsQueryKey() });
-          // Update selected appointment view optimistically
           setSelected(prev => prev && prev.id === id ? { ...prev, status: newStatus } : prev);
           toast({ title: "Status Updated", description: `Appointment #${id} marked as ${newStatus}.` });
         },
         onError: () => {
           toast({ title: "Error", description: "Failed to update status.", variant: "destructive" });
+        },
+      }
+    );
+  };
+
+  // ── Drag handlers ──────────────────────────────────────────────────────────
+
+  const handleDragStart = (e: React.DragEvent, apt: Appointment) => {
+    draggedAptRef.current = apt;
+    isDraggingRef.current = true;
+    e.dataTransfer.effectAllowed = "move";
+    // ghost image opacity via CSS handled below
+    e.dataTransfer.setData("text/plain", String(apt.id));
+  };
+
+  const handleDragEnd = () => {
+    draggedAptRef.current = null;
+    isDraggingRef.current = false;
+    setDropHighlight(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, ymd: string, hour: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDropHighlight({ ymd, hour });
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Only clear if leaving the cell entirely (not entering a child)
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setDropHighlight(null);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, ymd: string, hour: number) => {
+    e.preventDefault();
+    setDropHighlight(null);
+    const apt = draggedAptRef.current;
+    if (!apt) return;
+
+    // No-op if dropped on same slot
+    if (apt.appointmentDate === ymd && timeToHour(apt.appointmentTime) >= hour && timeToHour(apt.appointmentTime) < hour + 1) {
+      return;
+    }
+
+    setPendingReschedule({ apt, newDate: ymd, newHour: hour });
+  };
+
+  const confirmReschedule = () => {
+    if (!pendingReschedule) return;
+    const { apt, newDate, newHour } = pendingReschedule;
+    const newTime = hourToTime(newHour);
+
+    updateMutation.mutate(
+      { id: apt.id, data: { appointmentDate: newDate, appointmentTime: newTime } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListAppointmentsQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getGetAppointmentSummaryQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getGetTodayAppointmentsQueryKey() });
+          toast({
+            title: "Appointment Rescheduled",
+            description: `#${apt.id.toString().padStart(4, "0")} moved to ${formatDate(newDate)} at ${formatTime(newTime)}.`,
+          });
+          setPendingReschedule(null);
+        },
+        onError: () => {
+          toast({ title: "Error", description: "Failed to reschedule appointment.", variant: "destructive" });
+          setPendingReschedule(null);
         },
       }
     );
@@ -204,27 +288,41 @@ export default function AdminCalendar() {
                       const h = timeToHour(a.appointmentTime);
                       return h >= hour && h < hour + 1;
                     });
+                    const isHighlighted =
+                      dropHighlight?.ymd === ymd && dropHighlight?.hour === hour;
 
                     return (
                       <div
                         key={dayIdx}
-                        className={`border-r border-border last:border-r-0 p-1 flex flex-col gap-1 ${isToday ? "bg-primary/[0.02]" : ""}`}
+                        className={`border-r border-border last:border-r-0 p-1 flex flex-col gap-1 transition-colors
+                          ${isToday ? "bg-primary/[0.02]" : ""}
+                          ${isHighlighted ? "bg-primary/10 ring-1 ring-inset ring-primary/30" : ""}
+                        `}
+                        onDragOver={(e) => handleDragOver(e, ymd, hour)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, ymd, hour)}
                       >
                         {hourApts.map(apt => {
                           const s = getStyle(apt.status);
                           return (
-                            <button
+                            <div
                               key={apt.id}
-                              onClick={() => setSelected(apt)}
-                              className={`w-full text-left rounded px-1.5 py-1 border text-[11px] font-medium leading-tight transition-shadow hover:shadow-md cursor-pointer ${s.bg} ${s.border} ${s.text}`}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, apt)}
+                              onDragEnd={handleDragEnd}
+                              onClick={() => !isDraggingRef.current && setSelected(apt)}
+                              className={`group w-full text-left rounded px-1.5 py-1 border text-[11px] font-medium leading-tight
+                                transition-shadow hover:shadow-md cursor-grab active:cursor-grabbing active:opacity-50
+                                select-none ${s.bg} ${s.border} ${s.text}`}
                             >
                               <div className="flex items-center gap-1 mb-0.5">
+                                <GripVertical className="w-2.5 h-2.5 shrink-0 opacity-30 group-hover:opacity-60" />
                                 <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.dot}`} />
                                 <span className="font-semibold truncate">{formatTime(apt.appointmentTime)}</span>
                               </div>
                               <div className="truncate">{apt.customerName}</div>
                               <div className="truncate opacity-70">{apt.serviceName}</div>
-                            </button>
+                            </div>
                           );
                         })}
                       </div>
@@ -236,6 +334,45 @@ export default function AdminCalendar() {
           )}
         </div>
       </div>
+
+      {/* Reschedule Confirmation Dialog */}
+      <Dialog open={!!pendingReschedule} onOpenChange={open => !open && setPendingReschedule(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Reschedule Appointment?</DialogTitle>
+            <DialogDescription>
+              {pendingReschedule && (
+                <>
+                  Move{" "}
+                  <span className="font-semibold text-foreground">
+                    #{pendingReschedule.apt.id.toString().padStart(4, "0")} — {pendingReschedule.apt.customerName}
+                  </span>{" "}
+                  to{" "}
+                  <span className="font-semibold text-foreground">
+                    {formatDate(pendingReschedule.newDate)} at {formatTime(hourToTime(pendingReschedule.newHour))}
+                  </span>
+                  ?
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setPendingReschedule(null)}
+              disabled={updateMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmReschedule}
+              disabled={updateMutation.isPending}
+            >
+              {updateMutation.isPending ? "Saving…" : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Appointment Detail Dialog */}
       <Dialog open={!!selected} onOpenChange={open => !open && setSelected(null)}>
@@ -302,7 +439,7 @@ export default function AdminCalendar() {
                       className="flex-1 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
                       variant="outline"
                       onClick={() => handleStatusChange(selected.id, "confirmed")}
-                      disabled={updateStatus.isPending}
+                      disabled={updateMutation.isPending}
                     >
                       <Check className="w-4 h-4 mr-1" /> Confirm
                     </Button>
@@ -313,7 +450,7 @@ export default function AdminCalendar() {
                       className="flex-1"
                       variant="outline"
                       onClick={() => handleStatusChange(selected.id, "completed")}
-                      disabled={updateStatus.isPending}
+                      disabled={updateMutation.isPending}
                     >
                       Mark Complete
                     </Button>
@@ -324,7 +461,7 @@ export default function AdminCalendar() {
                       variant="ghost"
                       className="text-destructive hover:bg-destructive/10"
                       onClick={() => handleStatusChange(selected.id, "cancelled")}
-                      disabled={updateStatus.isPending}
+                      disabled={updateMutation.isPending}
                     >
                       <X className="w-4 h-4" />
                     </Button>

@@ -233,7 +233,7 @@ export default function Home() {
         </section>
 
         {/* 4. Services Grid */}
-        <section className="py-32 bg-black relative border-t border-white/5">
+        <section id="services" className="py-32 bg-black relative border-t border-white/5">
           <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
           <div className="container mx-auto px-6">
             <Reveal direction="up">
@@ -270,6 +270,76 @@ export default function Home() {
                   </div>
                 </Reveal>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Local SEO: detailed services and service area */}
+        <section className="py-28 bg-[#0d0d0d] border-t border-white/5">
+          <div className="container mx-auto px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+              <div>
+                <p className="text-primary font-serif font-bold uppercase tracking-[0.25em] text-sm mb-4">Santa Ana Collision Center</p>
+                <h2 className="font-serif text-4xl md:text-5xl font-black uppercase tracking-tight mb-8">
+                  Auto Body & Collision Repair in Orange County
+                </h2>
+                <div className="space-y-5 text-muted-foreground leading-relaxed text-lg">
+                  <p>
+                    Grand Auto Group provides collision repair and auto body service from our shop at 1409 E Warner Ave in Santa Ana. We repair accident damage ranging from dents and damaged panels to structural and frame repairs, then restore the finish with professional paint preparation and computerized color matching.
+                  </p>
+                  <p>
+                    Our team can help coordinate insurance collision claims, prepare a repair estimate and keep the mechanical and body work under one roof. Drivers visit us for bumper and panel repair, dent removal, frame straightening, suspension work, wheel alignment and post-collision diagnostics.
+                  </p>
+                  <p>
+                    We also provide routine maintenance, engine and electrical diagnostics, brake service, European auto repair and commercial fleet maintenance for customers throughout Santa Ana and Orange County.
+                  </p>
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-5">
+                {[
+                  ["Collision Repair", "Accident damage assessment, insurance coordination, structural repair and safe reassembly."],
+                  ["Body & Paint", "Dent and panel repair, paint preparation and computerized color matching."],
+                  ["Frame & Suspension", "Frame straightening, suspension inspection, steering repair and wheel alignment."],
+                  ["European Auto Repair", "Diagnostics, service and repair for BMW, Mercedes-Benz, Audi and Porsche vehicles."],
+                  ["Mechanical Repair", "Engine diagnostics, electrical troubleshooting, brakes and regular maintenance."],
+                  ["Fleet Maintenance", "Scheduled service and repair support for commercial cars, vans and light-duty fleets."],
+                ].map(([title, description]) => (
+                  <article key={title} className="border border-white/10 bg-white/[0.02] p-6">
+                    <h3 className="font-serif text-xl font-bold uppercase tracking-wide mb-3 text-white">{title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{description}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-24 bg-black border-y border-white/5">
+          <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <div>
+              <h2 className="font-serif text-4xl font-black uppercase tracking-tight mb-6">Serving Santa Ana & Orange County</h2>
+              <p className="text-lg text-muted-foreground leading-relaxed mb-6">
+                Our Santa Ana auto repair and body shop is convenient for drivers from Irvine, Tustin, Costa Mesa, Orange, Anaheim, Fountain Valley, Garden Grove and nearby Orange County communities.
+              </p>
+              <a href="https://maps.app.goo.gl/WFwWWNBM3HwBjPwq7" target="_blank" rel="noopener noreferrer" className="text-primary font-bold uppercase tracking-widest hover:text-white transition-colors">
+                Get directions to our Santa Ana shop →
+              </a>
+            </div>
+            <div>
+              <h2 className="font-serif text-4xl font-black uppercase tracking-tight mb-6">Auto Body Shop FAQs</h2>
+              <div className="space-y-6">
+                {[
+                  ["Do you work with insurance companies?", "Yes. We help customers coordinate insurance collision claims and manage the repair process from estimate through completion."],
+                  ["What body repairs do you handle?", "We handle collision damage, dents, damaged panels, frame and structural repairs, paint preparation and computerized color matching."],
+                  ["Do you service European cars?", "Yes. We service BMW, Mercedes-Benz, Audi and Porsche vehicles, as well as domestic and Asian makes."],
+                  ["Can I schedule service online?", "Yes. Use the Book Appointment button to choose an available time through our online booking system."],
+                ].map(([question, answer]) => (
+                  <article key={question}>
+                    <h3 className="font-serif text-xl font-bold text-white mb-2">{question}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{answer}</p>
+                  </article>
+                ))}
+              </div>
             </div>
           </div>
         </section>

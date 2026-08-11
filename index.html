@@ -107,11 +107,19 @@
         if (!link) return;
         var href = link.href || '';
         var eventName = '';
-        if (href.indexOf('booking.tekmetric.com') !== -1) eventName = 'booking_click';
+        var legacyEventName = '';
+        if (href.indexOf('booking.tekmetric.com') !== -1) {
+          eventName = 'schedule_appointment_click';
+          legacyEventName = 'booking_click';
+        }
         else if (href.indexOf('tel:') === 0) eventName = 'phone_click';
         else if (href.indexOf('mailto:') === 0) eventName = 'email_click';
         else if (href.indexOf('maps.app.goo.gl') !== -1) eventName = 'directions_click';
-        if (eventName) window.gtag('event', eventName, { link_url: href, link_text: (link.textContent || '').trim() });
+        if (eventName) {
+          var eventPayload = { link_url: href, link_text: (link.textContent || '').trim() };
+          window.gtag('event', eventName, eventPayload);
+          if (legacyEventName) window.gtag('event', legacyEventName, eventPayload);
+        }
       });
     </script>
     <div id="root"></div>

@@ -125,7 +125,7 @@ export default function Home() {
                     
                     <div className="space-y-2">
                       <p className="text-xs font-serif text-primary uppercase tracking-[0.2em]">Call Us Anytime</p>
-                      <p className="text-xl font-semibold tracking-wider">+1 657 267 0000</p>
+                      <p className="text-xl font-semibold tracking-wider">+1 657 476 7685</p>
                     </div>
                     <div className="w-full h-px bg-white/5" />
                     <div className="space-y-2">

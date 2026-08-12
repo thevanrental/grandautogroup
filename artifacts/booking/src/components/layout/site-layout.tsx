@@ -17,11 +17,11 @@ export function SiteHeader() {
         </Link>
         <div className="flex items-center gap-8">
           <a
-            href="tel:+16572670000"
+            href="tel:+16574767685"
             className="hidden md:flex items-center gap-2 text-sm font-semibold tracking-widest text-foreground hover:text-primary transition-colors"
           >
             <Phone className="w-4 h-4 text-primary" />
-            +1 657 267 0000
+            +1 657 476 7685
           </a>
           <a
             href={BOOKING_URL}
@@ -105,13 +105,13 @@ export function SiteFooter() {
           <ul className="space-y-4">
             <li>
               <a
-                href="tel:+16572670000"
+                href="tel:+16574767685"
                 className="group flex items-start gap-4 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <div className="p-2 bg-white/5 group-hover:bg-primary transition-colors">
                   <Phone className="w-4 h-4 text-primary group-hover:text-white" />
                 </div>
-                <span className="mt-1 tracking-wider font-semibold">+1 657 267 0000</span>
+                <span className="mt-1 tracking-wider font-semibold">+1 657 476 7685</span>
               </a>
             </li>
             <li>

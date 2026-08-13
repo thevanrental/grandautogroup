@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://grandautogroup.org/sitemap.xml
+Disallow: /admin
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /confirmation
+Sitemap: https://grand-auto-group-1.replit.app/sitemap.xml
